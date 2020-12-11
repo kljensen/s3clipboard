@@ -13,11 +13,11 @@
 #### Project description:
 
 `s3clipboard` is a small, Posix-compliant shell script for using S3 as a
-clipboard register. This lets you copy from one machine and paste on another.
-You can optionally encrypt the contents of the clipboard with a symmetric
-cipher using openssl. This project is similar to
-[sqs_clipboard](https://github.com/jftuga/sqs_clipboard) but it uses S3
-instead of SQS and it is shell script instead of a Go binary.
+clipboard register. This lets you "copy" from one machine and "paste" on
+another.  You can optionally encrypt the contents of the clipboard with a
+symmetric cipher using openssl. This project is similar to
+[sqs_clipboard](https://github.com/jftuga/sqs_clipboard) but it uses S3 instead
+of SQS and it is shell script instead of a Go binary.
 
 ## Installation
 
