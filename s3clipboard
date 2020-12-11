@@ -1,0 +1,102 @@
+#!/bin/sh
+# vi:syntax=sh
+
+usage() {
+    printf "%s\n" "Usage: $0 [-e] [-p PASSWORD] [-b BUCKET] [-o OBJECT_KEY] (copy|paste)" 
+}
+
+ENCRYPT=${S3CLIPBOARD_ENCRYPT}
+PASSWORD=${S3CLIPBOARD_PASSWORD}
+OBJECT=${S3CLIPBOARD_OBJECT:-s3clipboardcontent}
+BUCKET=${S3CLIPBOARD_BUCKET}
+AWS_PROFILE=${S3CLIPBOARD_AWS_PROFILE}
+
+while getopts ":ehp:o:b:a:" FLAG
+do	case "$FLAG" in
+    e)
+        ENCRYPT="yes"
+        ;;
+    a)
+        AWS_PROFILE="$OPTARG"
+        ;;
+    b)
+        BUCKET="$OPTARG"
+        ;;
+    o)
+        OBJECT="$OPTARG"
+        ;;
+    p)
+        PASSWORD="$OPTARG"
+        ;;
+    h)
+        usage
+        exit 0
+        ;;
+    \?)
+        usage
+        exit 2
+        ;;
+    esac
+done
+shift "$((OPTIND-1))"
+
+# Check that we got exactly one argument
+if [ "$#" -ne 1 ] || [ -z "$1" ]; then
+    usage
+    exit 1
+fi
+
+# Check that the command is valid
+COMMAND="$1"
+if [ "$COMMAND" != "copy" ] && [ "$COMMAND" != "paste" ]; then
+    usage
+    exit 1
+fi
+
+# Check for openssl
+if openssl version 1>/dev/null 2>&1; then
+    HAS_OPENSSL="true"
+else
+    HAS_OPENSSL=""
+fi
+
+# Check for the AWS CLI
+if ! aws --version 1>/dev/null 2>&1; then
+    printf "%s\n" "Error: could not find aws cli"
+    exit 1
+fi
+
+# You cannot use encryption without openssl
+if [ -n "$ENCRYPT" ] && [ -z "$HAS_OPENSSL" ]; then
+    echo "Error: cannot encrypt without openssl"
+    exit 1
+fi
+
+if [ -n "$AWS_PROFILE" ]; then
+    export AWS_PROFILE="$AWS_PROFILE"
+fi
+
+# Build the openssl command
+if [ -n "$ENCRYPT" ]; then
+    OSSL="openssl enc -aes-256-cbc -a"
+    if [ "$COMMAND" = "paste" ]; then
+        OSSL="$OSSL -d"
+    fi
+    if [ -n "$PASSWORD" ]; then
+        OSSL="$OSSL -pass env:S3CLIPBOARD_PASSWORD"
+    fi
+else
+    OSSL="cat -"
+fi
+
+# Finally, run our command
+export S3CLIPBOARD_PASSWORD="$PASSWORD"
+if [ "$COMMAND" = "copy" ]; then
+    $OSSL | \
+        aws s3 cp - "s3://$BUCKET/$OBJECT"
+else
+    aws s3 cp "s3://$BUCKET/$OBJECT" - | \
+        $OSSL
+fi
+
+
