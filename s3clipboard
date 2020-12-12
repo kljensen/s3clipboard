@@ -5,13 +5,14 @@ usage() {
     printf "%s\n" "Usage: $0 [-e] [-p PASSWORD] [-b BUCKET] [-o OBJECT_KEY] (copy|paste)" 
 }
 
+VERSION="v0.1.0"
 ENCRYPT=${S3CLIPBOARD_ENCRYPT}
 PASSWORD=${S3CLIPBOARD_PASSWORD}
 OBJECT=${S3CLIPBOARD_OBJECT:-s3clipboardcontent}
 BUCKET=${S3CLIPBOARD_BUCKET}
 AWS_PROFILE=${S3CLIPBOARD_AWS_PROFILE}
 
-while getopts ":ehp:o:b:a:" FLAG
+while getopts ":ehvp:o:b:a:" FLAG
 do	case "$FLAG" in
     e)
         ENCRYPT="yes"
@@ -30,6 +31,10 @@ do	case "$FLAG" in
         ;;
     h)
         usage
+        exit 0
+        ;;
+    v)
+        printf "%s\n" "$VERSION"
         exit 0
         ;;
     \?)
