@@ -33,6 +33,20 @@ Or by downloading the `s3clipboard` shell script directly
 curl -O https://raw.githubusercontent.com/kljensen/s3clipboard/main/s3clipboard
 ```
 
+Or, if you are a [homebrew](https://brew.sh/) user, you can install 
+`s3clipboard` via the `kljensen/tap` tap using either
+
+```
+brew install kljensen/tap/s3clipboard
+```
+
+or
+
+```
+brew tap kljensen/tap
+brew install s3clipboard
+```
+
 **Requirements/Dependencies:**
 - The [AWS CLI](https://github.com/aws/aws-cli)
 - [OpenSSL](https://www.openssl.org/) or [LibreSSL](https://www.libressl.org/) for encryption
